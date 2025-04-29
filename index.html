@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atelier Complet MongoDB Atlas</title>
+  <!-- Favicon / logo onglet → fsbm.png  -->
+  <link rel="icon" type="image/png" href="images/mongodb.svg">
+  <style>
+    :root {
+      --primary: #13AA52;
+      --secondary: #888888;
+      --accent: #FF6B42;
+      --light: #F5F7FA;
+      --dark: #242E3F;
+    }
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;color:var(--dark);background-color:var(--light);padding:0;margin:0;}
+    .container{max-width:1200px;margin:0 auto;padding:20px;}
+
+    /*────────────  HEADER  ────────────*/
+    header{background-color:#fff;color:#13AA52;padding:1.8rem 0;margin-bottom:2rem;}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+    .header-inner h1{flex:1;text-align:center;font-size:2.3rem;margin:0;}
+    .logo{height:auto;width:200px;object-fit:contain;}
+
+    /*────────────  TYPO & LAYOUT  ────────────*/
+    h2{color:var(--primary);border-bottom:2px solid var(--primary);padding-bottom:0.5rem;margin-top:2rem;}
+    h3{color:var(--secondary);margin-top:1.5rem;}
+    .module{background:#fff;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,.1);padding:1.5rem;margin-bottom:2rem;}
+    .step{margin-bottom:1.5rem;padding-left:1rem;border-left:3px solid var(--accent);}    
+    .step-number{display:inline-block;background:var(--primary);color:#fff;width:28px;height:28px;text-align:center;border-radius:50%;margin-right:0.5rem;font-weight:bold;}
+    code{background:var(--secondary);color:#fff;padding:0.2rem 0.4rem;border-radius:4px;font-family:'Courier New',Courier,monospace;}
+    pre{background:var(--dark);color:#fff;padding:1rem;border-radius:6px;overflow-x:auto;line-height:1.4;}
+
+    /*────────────  HINTS & CALLOUTS  ────────────*/
+    .hint-container{margin:1rem 0;}
+    .hint-toggle{background:#FFC107;color:#333;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;display:flex;align-items:center;width:100%;text-align:left;font-weight:bold;transition:all .3s;margin:0.5rem 0;}
+    .hint-toggle:hover{background:#FFB300;}
+    .hint-toggle:after{content:"↓";margin-left:auto;transition:transform .3s;}
+    .hint-toggle.active:after{transform:rotate(180deg);}    
+    .hint-content{background:#FFF8E6;padding:0;max-height:0;overflow:hidden;transition:max-height .3s ease-out,padding .3s ease;border-radius:0 0 4px 4px;}
+    .hint-content.active{padding:1rem;max-height:1000px;border-left:4px solid #FFC107;}
+    .hint-content-inner{padding:0.5rem;}
+
+    .visual-guide{margin:1rem 0;text-align:center;background:#f0f0f0;padding:1rem;border-radius:6px;}
+    .note{background:#E3F2FD;border-left:4px solid #2196F3;padding:0.8rem;margin:1rem 0;border-radius:0 4px 4px 0;}
+    .note-title{font-weight:bold;color:#0D47A1;margin-bottom:0.5rem;}
+    .var-red{color:#e53935 !important;font-weight:600;}
+    .warning{background:#FFEBEE;border-left:4px solid #F44336;padding:0.8rem;margin:1rem 0;border-radius:0 4px 4px 0;}
+    .warning-title{font-weight:bold;color:#B71C1C;margin-bottom:0.5rem;}
+    .checklist{list-style-type:none;padding-left:0;}
+    .checklist li{margin-bottom:0.5rem;padding-left:1.5rem;position:relative;}
+    .checklist li:before{content:"✓";color:var(--primary);position:absolute;left:0;}
+    .command-box{background:var(--dark);color:#fff;padding:1rem;border-radius:6px;margin:1rem 0;position:relative;}
+    .copy-btn{position:absolute;right:0.5rem;top:0.5rem;background:rgba(255,255,255,.2);border:none;color:#fff;padding:0.25rem 0.5rem;border-radius:4px;cursor:pointer;}
+    .copy-btn:hover{background:rgba(255,255,255,.3);}    
+
+    footer{text-align:center;margin-top:3rem;padding:1rem;background:var(--secondary);color:#ffffff;}
+
+    @media(max-width:768px){.container{padding:10px;}.header-inner h1{font-size:1.6rem;}.logo{height:45px;}}
+
+    /*────────────  USER VARS  ────────────*/
+    .user-vars{background:#fff;box-shadow:0 4px 6px rgba(0,0,0,.05);border-radius:8px;padding:1rem 1.5rem;margin-bottom:2rem;}
+    .user-vars label{display:block;margin:0.6rem 0;font-weight:600;color:var(--secondary);}    
+    .user-vars input{width:100%;max-width:400px;padding:0.45rem 0.6rem;border:1px solid #ccc;border-radius:4px;margin-left:0.5rem;}
+  </style>
+</head>
+<body>
+  <!--────────────  HEADER  ────────────-->
+  <header>
+    <div class="container header-inner">
+      <!-- Logo gauche -->
+      <img src="images/fsbm.png" alt="Logo FSBM" class="logo">
+      <!-- Titre -->
+      <h1>Atelier7 – sauvegarde et restauration – supervision dans MongoDB</h1>
+      <!-- Logo droit -->
+      <img src="images/dsbd.jpg" alt="Logo DSBD" class="logo">
+    </div>
+  </header>
+
+    <!-- Introduction -->
+    <section id="introduction">
+      <h2>Objectif</h2>
+      <p>Cet atelier vous guidera à travers toutes les opérations essentielles de sauvegarde et restauration – supervision d'une base de données <strong>MongoDB</strong>.</p>
+      
+      <div class="note">
+        <div class="note-title">Ce que vous apprendrez</div>
+        <ul>
+          <li>Configurer un cluster MongoDB Atlas</li>
+          <li>Administrer une base de données</li>
+          <li>Exporter/importer des données</li>
+          <li>Sauvegarder et restaurer</li>
+          <li>Superviser les performances</li>
+          <li>Analyser les logs</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <div class="warning-title">Voir les Resultats finale dans la dernière partie</div>
+      </div>
+
+      <div class="warning">
+        <div class="warning-title">Important pour les gents ayant déjà un compte MongoDB Atlas</div>
+        <p>Si vous possédez déjà un compte MongoDB Atlas, il est recommandé de créer un nouveau compte dédié à cet atelier. Cela permettra d'éviter toute confusion avec vos projets existants et de suivre les étapes de l'atelier dans un environnement propre.</p>
+      </div>
+      
+      <div class="warning">
+        <div class="warning-title">Important</div>
+        <p>Pour suivre cet atelier, vous aurez besoin :</p>
+        <ol>
+          <li>D'un compte MongoDB Atlas (nous allons en créer un)</li>
+          <li>De MongoDB Compass</li>
+          <li>Des outils en ligne de commande MongoDB (mongodump, mongoexport, etc.)</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Module 1 -->
+    <div class="module" id="module1">
+      <h2>Module 1 : Configuration Initiale</h2>
+      <p>Création d'un cluster et chargement de la base sample_airbnb.</p>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Créer un compte MongoDB Atlas</h3>
+        <p>Rendez-vous sur <a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a> et cliquez sur "Get Started".</p>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint1-1')">💡 Astuce : Processus d'inscription</button>
+          <div class="hint-content" id="hint1-1">
+            <div class="hint-content-inner">
+              <p>Le processus d'inscription nécessite :</p>
+              <ol>
+                <li>Une adresse email valide (vous recevrez un lien de confirmation)</li>
+                <li>Un mot de passe sécurisé (12 caractères minimum)</li>
+                <li>L'acceptation des conditions d'utilisation</li>
+              </ol>
+              <div class="visual-guide">
+                <div class="visual-guide"><img src="images/0427.gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Créer un cluster gratuit</h3>
+        <p>Dans l'interface Atlas :</p>
+        <ol>
+          <li>Cliquez sur "Build a Cluster"</li>
+          <li>Sélectionnez le tier "M0" (gratuit)</li>
+          <li>Choisissez votre région (préférez une région proche)</li>
+          <li>Cliquez sur "Create Cluster"</li>
+        </ol>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint1-2')">💡 Astuce : Choix de la région</button>
+          <div class="hint-content" id="hint1-2">
+            <div class="hint-content-inner">
+              <p>Pour de meilleures performances :</p>
+              <ul>
+                <li>Choisissez "Paris"</li>
+              </ul>
+              <div class="note">
+                <div class="note-title">Note</div>
+                <p>Le déploiement du cluster prend environ 5-10 minutes.</p>
+                <div class="visual-guide"><img src="images/0427_1_.gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Charger sample_airbnb</h3>
+        <p>Une fois le cluster créé :</p>
+        <ol>
+          <li>Cliquez sur "..." à côté du nom de votre cluster</li>
+          <li>Sélectionnez "Load Sample Dataset"</li>
+          <li>Confirmez l'opération</li>
+        </ol>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint1-3')">💡 Astuce : Vérification des données</button>
+          <div class="hint-content" id="hint1-3">
+            <div class="hint-content-inner">
+              <p>Charger les données&nbsp;:</p>
+
+              <ul>
+                <li>Dans Atlas, si vous pouvez choisir un jeu de données, sélectionnez uniquement <code>sample_airbnb</code>.</li>
+              </ul>
+              
+              <div class="visual-guide">
+                <img src="images/load_dataset.png"
+                     alt="Guide d’inscription MongoDB Atlas"
+                     width="50%"
+                     align="center">
+              </div>
+              
+              <ul>
+                <li>Sinon, chargez l’ensemble des jeux de données.</li>
+              </ul>
+              <div class="visual-guide">
+                <div class="visual-guide"><img src="images/0427_2_.gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              </div>
+              <div class="hint-content-inner">
+                <p>Pour vérifier que les données sont bien chargées :</p>
+                <ol>
+                  <li>Allez dans l'onglet "Collections"</li>
+                  <li>Vérifiez la présence de la base <code>sample_airbnb</code></li>
+                  <li>Ouvrez la collection <code>listingsAndReviews</code></li>
+                </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">4</div>
+      <h3>Configurer la sécurité</h3>
+      <p>Avant de pouvoir vous connecter :</p>
+      
+      <h4>Créer un utilisateur :</h4>
+      <ol>
+        <li>Allez dans "Database Access"</li>
+        <li>Cliquez sur "Edit User "</li>
+        <li>Choisissez "Changer Password"</li>
+      </ol>
+      <h4>Ou Créer un utilisateur :</h4>
+      <ol>
+        <li>Allez dans "Database Access"</li>
+        <li>Cliquez sur "Add New Database User"</li>
+        <li>Choisissez "Password Authentication"</li>
+        <li>Entrez un nom d'utilisateur et mot de passe</li>
+        <li>Attribuez le rôle "Atlas Admin"</li>
+      </ol>
+      
+      <h4>Autoriser les accès réseau :</h4>
+      <ol>
+        <li>Allez dans "Network Access"</li>
+        <li>Cliquez sur "Add IP Address"</li>
+        <li>Entrez "0.0.0.0/0" (pour cet atelier seulement)</li>
+        <li>Cliquez sur "Confirm"</li>
+      </ol>
+      
+      <div class="hint-container">
+        <button class="hint-toggle" onclick="toggleHint('hint1-4')">💡 Astuce : Sécurité en production</button>
+        <div class="hint-content" id="hint1-4">
+          <div class="hint-content-inner">
+            <p>En environnement de production :</p>
+            <ul>
+              <li>Créez des utilisateurs avec des rôles spécifiques (pas "Atlas Admin")</li>
+              <li>Restreignez les accès IP à votre adresse seulement</li>
+              <li>Activez l'authentification à deux facteurs</li>
+            </ul>
+            <div class="warning">
+              <div class="warning-title">Attention</div>
+              <p>L'utilisation de "0.0.0.0/0" est pratique pour les tests mais dangereuse en production.</p>
+            </div>
+            <div class="visual-guide"><img src="images/0427_3_.gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!--────────────  INPUTS UTILISATEUR  ────────────-->
+  <div class="container user-vars">
+    <div class="note" style="margin:0">
+      <div class="warning-title">Vous pouvez placer vos variables ici pour  générer et copier les commandes</div>
+      <label>Username : <input type="text" id="var-username" placeholder="username"></label>
+      <label>Password : <input type="password" id="var-password" placeholder="password"></label>
+      <label>Nom du cluster : <input type="text" id="var-cluster" placeholder="abc123"></label>
+    </div>
+  </div>
+
+    <!-- Module 2 -->
+    <div class="module" id="module2">
+      <h2>Module 2 : Exploration des Données</h2>
+      <p>Découverte de la structure et du contenu de sample_airbnb.</p>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Se connecter avec MongoDB Compass</h3>
+        <ol>
+          <li>Récupérez l'URI de connexion dans Atlas (Connect > Compass)</li>
+          <li>Collez l'URI dans Compass et connectez-vous</li>
+        </ol>
+
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>
+        
+        
+        <div class="command-box">
+          <code>
+            mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net/sample_airbnb
+          </code>          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint2-1')">💡 Astuce : Problèmes de connexion</button>
+          <div class="hint-content" id="hint2-1">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(4).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+
+              <p>Si la connexion échoue :</p>
+              <ul>
+                <li>Vérifiez que votre utilisateur a bien été créé</li>
+                <li>Vérifiez que votre IP est autorisée</li>
+                <li>Essayez de redémarrer Compass</li>
+                <li>Vérifiez que le cluster est bien en état "Running"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Explorer la collection listingsAndReviews</h3>
+        <p>Dans Compass :</p>
+        <ol>
+          <li>Sélectionnez la base <code>sample_airbnb</code></li>
+          <li>Ouvrez la collection <code>listingsAndReviews</code></li>
+          <li>Cliquez sur "Schema" pour voir la structure des documents</li>
+        </ol>
+        <p>Essayez ces requêtes :</p>
+        <pre><code>// Trouver les appartements avec plus de 3 chambres
+{"bedrooms": {"$gt": 3}}
+
+// Trouver les appartements à New York
+{"address.market": "New York"}
+
+// Tester une requête illogique (No result)
+{"price": -1}</code></pre>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint2-2')">💡 Astuce : Requêtes utiles</button>
+          <div class="hint-content" id="hint2-2">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(5).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module 3 -->
+    <div class="module" id="module3">
+      <h2>Module 3 : Import/Export de Données</h2>
+      <p>Techniques pour exporter et importer des collections.</p>
+
+      <div class="step">
+        <div class="step-number">0</div>
+        <p>Rendez-vous sur <a href="https://www.mongodb.com/try/download/database-tools" target="_blank">MongoDB Tools</a> et Télicharger "MongoDB Command Line Database Tools".</p>
+        <p>Copier les fichiers et écraser ceux du dossier bin de MongoDB</p>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint3-0')">💡 Astuce : Télicharger les tools</button>
+          <div class="hint-content" id="hint3-0">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(6).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Exporter une collection avec mongoexport</h3>
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>
+        
+        <p>Dans votre terminal :</p>
+        
+        <div class="command-box">
+          <code>mongoexport --uri="mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net/sample_airbnb" --collection=listingsAndReviews --out=listings.json</code>
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint3-1')">💡 Astuce : Options d'export</button>
+          <div class="hint-content" id="hint3-1">
+            <div class="hint-content-inner">
+              <p>Options utiles :</p>
+              <ul>
+                <li><code>--type=csv</code> : Export en CSV</li>
+                <li><code>--fields=name,price,bedrooms</code> : Sélection de champs</li>
+                <li><code>--query='{"bedrooms": {"$gt": 2}}'</code> : Filtrer les documents</li>
+                <li><code>--limit=100</code> : Limiter le nombre de documents</li>
+              </ul>
+              <div class="visual-guide"><img src="images/0427(7).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Importer des données avec mongoimport</h3>
+        <p>Pour importer dans une nouvelle base :</p>
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>
+        
+        
+        <div class="command-box">
+          <code>mongodump  --uri="mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net/sample_airbnb" --out=sauvegarde_airbnb</code>
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint3-2')">💡 Astuce : Vérification de l'import</button>
+          <div class="hint-content" id="hint3-2">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(8).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              <p>Après l'import :</p>
+              <ol>
+                <li>Connectez-vous avec Compass</li>
+                <li>Vérifiez la nouvelle base <code>test_airbnb</code></li>
+                <li>Comparez le nombre de documents avec l'original</li>
+                <li>Vérifiez que les champs importants sont présents</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module 4 -->
+    <div class="module" id="module4">
+      <h2>Module 4 : Sauvegarde et Restauration</h2>
+      <p>Techniques complètes de sauvegarde et restauration.</p>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Sauvegarder la base avec mongodump</h3>
+
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>
+        
+        <p>Commande complète :</p>
+        
+        <div class="command-box">
+          <code>mongodump --uri="mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net/sample_airbnb" --out=sauvegarde_airbnb</code>
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint4-1')">💡 Astuce : Structure des sauvegardes</button>
+          <div class="hint-content" id="hint4-1">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(9).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              <p>mongodump crée cette structure :</p>
+              <pre>sauvegarde_airbnb/
+  sample_airbnb/
+    listingsAndReviews.bson
+    listingsAndReviews.metadata.json
+    ...autres collections...</pre>
+              <p>Les fichiers BSON contiennent les données, les JSON les métadonnées.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Restaurer avec mongorestore</h3>
+        <h4>Sauvegarder (mongodump) en format archive</h4>
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>
+        
+        <div class="command-box">
+          <code>mongodump  --uri="mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net/sample_airbnb" --archive=backup_airbnb.archive --gzip</code>
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        <p>Pour restaurer dans une nouvelle base :</p>
+        <p>
+          Les valeurs indiquées <span class="var-red">en&nbsp;rouge</span>
+          (<span class="var-red">&lt;username&gt;</span>,
+          <span class="var-red">&lt;password&gt;</span>,
+          <span class="var-red">abc123</span>)
+          doivent être remplacées par votre nom&nbsp;d’utilisateur, votre mot&nbsp;de&nbsp;passe et le nom de votre cluster.
+        </p>        
+        
+        <div class="command-box">
+          <code>mongorestore --uri="mongodb+srv://<span class="var-red">&lt;username&gt;</span>:<span class="var-red">&lt;password&gt;</span>@cluster0.<span class="var-red">abc123</span>.mongodb.net" --nsFrom="sample_airbnb.*" --nsTo="restored_airbnb.*" --archive=backup_airbnb.archive --gzip --drop</code>
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copier</button>
+        </div>
+        
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint4-2')">💡 Astuce : Options de restauration</button>
+          <div class="hint-content" id="hint4-2">
+            <div class="hint-content-inner">
+              <div class="visual-guide"><img src="images/0427(10).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              <p>Options avancées :</p>
+              <ul>
+                <li><code>--drop</code> : Supprime les collections existantes avant restauration</li>
+                <li><code>--noIndexRestore</code> : Ne restaure pas les index</li>
+                <li><code>--gzip</code> : Pour restaurer des sauvegardes compressées</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module 5 -->
+    <div class="module" id="module5">
+      <h2>Module 5 : Supervision</h2>
+      <p>Surveillance des performances et configuration d'alertes sur un cluster M0.</p>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Surveiller les métriques dans Atlas</h3>
+        <p>Dans l'interface Atlas :</p>
+        <ol>
+          <li>Allez dans votre cluster</li>
+          <li>Ouvrez l'onglet "Metrics"</li>
+          <li>Analysez les graphiques :
+            <ul>
+              <li>Connections</li>
+              <li>Network</li>
+              <li>Logical Size</li>
+              <li>Opcounters</li>
+            </ul>
+          </li>
+        </ol>
+
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint5-1')">💡 Astuce : Interprétation des métriques</button>
+          <div class="hint-content" id="hint5-1">
+            <div class="hint-content-inner">
+              <p>Ce qu'il faut surveiller :</p>
+              <ul>
+                <li><strong>Connections proches de la limite</strong> : risque de saturation</li>
+                <li><strong>Network élevé</strong> : trafic important de données</li>
+                <li><strong>Logical Size proche de 512MB</strong> : risque d'atteindre la limite de stockage</li>
+                <li><strong>Opcounters élevés</strong> : beaucoup d'opérations en cours</li>
+              </ul>
+              <div class="visual-guide"><img src="images/0427(11).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Configurer des alertes</h3>
+        <p>Pour créer une alerte sur un cluster M0 :</p>
+        <ol>
+          <li>Allez dans "Alerts" dans le menu principal</li>
+          <li>Cliquez sur "Create Alert"</li>
+          <li>Dans "Category", sélectionnez par exemple <strong>Host</strong> ou <strong>Project</strong></li>
+          <li>Dans "Condition/Metric", choisissez une condition comme <strong>Host is down</strong></li>
+          <li>Cochez "Email" pour recevoir la notification</li>
+          <li>Cliquez sur "Save"</li>
+        </ol>
+      
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint5-2')">💡 Astuce : Alertes recommandées</button>
+          <div class="hint-content" id="hint5-2">
+            <div class="hint-content-inner">
+              <p>Alertes recommandées pour M0 :</p>
+              <ul>
+                <li><strong>Host is down</strong> : être alerté si le serveur devient indisponible</li>
+                <li><strong>Connections > 80% de la limite</strong></li>
+                <li><strong>Logical Size > 400MB</strong> : approche de la limite de stockage</li>
+                <li><strong>Network In/Out</strong> anormalement élevé : détection d'un trafic inhabituel</li>
+              </ul>
+              <div class="visual-guide"><img src="images/0427(12).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module 6 -->
+    <div class="module" id="module6">
+      <h2>Module 6 : Gestion des Logs</h2>
+      <p>Accès et analyse de l'activité MongoDB dans Atlas.</p>
+      
+      <div class="step">
+        <h3>Accéder aux journaux d'activité (Activity Feed)</h3>
+        <p>Dans l'interface Atlas :</p>
+        <ol>
+          <li>Allez dans votre projet Atlas</li>
+          <li>Ouvrez le menu "Activity Feed"</li>
+          <li>Filtrez par événement, cluster, ou période</li>
+          <li>Consultez les actions administratives (lectures, écritures, suppression de bases...)</li>
+        </ol>
+
+        <div class="hint-container">
+          <button class="hint-toggle" onclick="toggleHint('hint6-1')">💡 Astuce : Notes importantes</button>
+          <div class="hint-content" id="hint6-1">
+            <div class="hint-content-inner">
+              <p>À savoir :</p>
+              <ul>
+                <li>Le "Activity Feed" liste les opérations réalisées (find, insert, dropDatabase...)</li>
+                <li>Les vrais logs système (erreurs, requêtes lentes) ne sont disponibles que sur les clusters <strong>payants (M10 et +)</strong>.</li>
+                <li>Sur M0 gratuit, vous ne verrez pas les logs de performance détaillés.</li>
+              </ul>
+              <div class="visual-guide"><img src="images/0427(13).gif" alt="Guide inscription MongoDB Atlas" width="100%"></div>
+              <!-- Image GIF 0427(12).gif -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats Finaux -->
+    <div class="module" id="resultats-finaux">
+      <h2>Résultats Finaux</h2>
+      <p>À l'issue de ces 6 modules, vous serez capable de :</p>
+      <ul class="checklist">
+        <li>Déployer et configurer un cluster MongoDB Atlas avec des paramètres de sécurité de base</li>
+        <li>Explorer la structure et le contenu d'une base <code>sample_airbnb</code> via Compass</li>
+        <li>Maîtriser les processus d'export et d'import de collections</li>
+        <li>Effectuer des sauvegardes complètes et restaurations ciblées</li>
+        <li>Surveiller les métriques clés et créer des alertes pertinentes</li>
+        <li>Analyser l'activité de votre projet pour assurer la conformité et la performance</li>
+      </ul>
+      <div class="note">
+        <div class="note-title">Livrables :</div>
+      
+        <!-- Étape 1 -->
+        <div class="step-number">1</div>
+        <figure class="visual-guide">
+          <img src="images/1.png"
+               alt="MongoDB Compass affichant les bases restored_airbnb, sample_airbnb et test_airbnb"
+               width="80%" align="center">
+          <figcaption>
+            MongoDB Compass – les bases <strong>restored_airbnb</strong>, <strong>sample_airbnb</strong>
+            et <strong>test_airbnb</strong> sont bien présentes.
+          </figcaption>
+        </figure>
+      
+        <!-- Étape 2 -->
+        <div class="step-number">2</div>
+        <figure class="visual-guide">
+          <img src="images/2.png"
+               alt="Console montrant mongoexport, mongodump et mongorestore avec 5 555 documents traités"
+               width="80%" align="center">
+          <figcaption>
+            Journal d’export, de dump puis de restauration (5 555 documents).
+          </figcaption>
+        </figure>
+      
+        <!-- Étape 3 -->
+        <div class="step-number">3</div>
+        <figure class="visual-guide">
+          <img src="images/3.png"
+               alt="Dashboard Atlas : courbes OpCounters, Logical Size, Connections et Network"
+               width="80%" align="center">
+          <figcaption>
+            Les metriques Atlas.
+          </figcaption>
+        </figure>
+      
+        <!-- Étape 4 -->
+        <div class="step-number">4</div>
+        <figure class="visual-guide">
+          <img src="images/4.png"
+               alt="Écran Atlas montrant la configuration des alertes du projet"
+               width="80%" align="center">
+          <figcaption>
+            Paramètres d’alertes du projet : Une alerte a été créé .
+          </figcaption>
+        </figure>
+      
+        <!-- Étape 5 -->
+        <div class="step-number">5</div>
+        <figure class="visual-guide">
+          <img src="images/5.png"
+               alt="Atlas Activity Feed listant les opérations réalisées par l’utilisateur"
+               width="80%" align="center">
+          <figcaption>
+            Activity Feed – historique des actions.
+          </figcaption>
+        </figure>
+      </div>
+      
+
+
+    </div>  </div>
+
+  <!--────────────  FOOTER  ────────────-->
+  <footer><div class="container"><p>Atelier Complet MongoDB Atlas – sauvegarde, restauration &amp; supervision</p></div></footer>
+
+  <script>
+    // Stocke templates initiaux et met à jour affichage + copie
+    document.addEventListener('DOMContentLoaded',()=>{
+      const codeElems=document.querySelectorAll('.command-box code');
+      codeElems.forEach(el=>el.dataset.template=el.textContent);
+      ['var-username','var-password','var-cluster'].forEach(id=>{
+        document.getElementById(id).addEventListener('input',updateCommands);
+      });
+      function updateCommands(){
+        const u=document.getElementById('var-username').value||'<username>';
+        const p=document.getElementById('var-password').value||'<password>';
+        const c=document.getElementById('var-cluster').value||'abc123';
+        codeElems.forEach(el=>{
+          el.textContent=el.dataset.template.replace(/<username>/g,u).replace(/<password>/g,p).replace(/abc123/g,c);
+        });
+      }
+      updateCommands();
+    });
+    function copyToClipboard(btn){
+      const code=btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(()=>{
+        btn.textContent='Copié!';setTimeout(()=>btn.textContent='Copier',2000);
+      });
+    }
+    function toggleHint(id){const h=document.getElementById(id);const b=h.previousElementSibling;h.classList.toggle('active');b.classList.toggle('active');if(h.classList.contains('active'))h.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    document.addEventListener('click',e=>{if(!e.target.classList.contains('hint-toggle')&&!e.target.classList.contains('copy-btn')){document.querySelectorAll('.hint-content.active').forEach(h=>{h.classList.remove('active');h.previousElementSibling.classList.remove('active');});}});
+  </script>
+</body>
+</html>
